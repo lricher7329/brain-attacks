@@ -1,0 +1,8 @@
+project_id: ms_brain_attacks
+name: "Brain Attacks"
+
+project_home: ~/Library/CloudStorage/GoogleDrive-lricher@ualberta.ca/My Drive/Research/brain-attacks
+
+data_sources:
+  raw: /Volumes/fomd-richerlab/data/brain_attacks
+  access: vpn
