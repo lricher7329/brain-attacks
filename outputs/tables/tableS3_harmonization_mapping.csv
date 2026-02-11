@@ -1,0 +1,50 @@
+Category,Concept,Year 1 Field,Year 2 Field,Harmonized Field,Notes
+Simple Rename,Season,time_of_year,time_year,time_year,
+Simple Rename,Presentation time,presentation_time,time,time,
+Simple Rename,Other symptom text,othersymptom_specify,symptom_other,symptom_other,
+Simple Rename,Medically benign other,med_benign_other_specify,med_benign_specify,med_benign_specify,
+Simple Rename,MI diagnosis checkboxes,med_important_diagnosis___1-10,med_imp_dx___1-11,med_imp_dx___1-11,"Year 1 mapped ___1-10 to ___1-10; ___11 (Other MI) added as empty for Year 1"
+Simple Rename,MI diagnosis specify,—,med_imp_specify,med_imp_specify,Year 1 has no MI specify field; added as empty
+Simple Rename,Migraine treatments,migraine_treatments___1-3,migraine_tx___1-3,migraine_tx___1-3,
+Simple Rename,Headache treatments,headache_treatments___1-3,headache_tx___1-3,headache_tx___1-3,
+Restructured,Headache specify - Nausea,headache_specify___3,headache_specify___1,ha_nausea,"Year 1 ___3 remapped to Year 2 ___1 numbering"
+Restructured,Headache specify - Vomiting,headache_specify___4,headache_specify___2,ha_vomiting,"Year 1 ___4 remapped to Year 2 ___2 numbering"
+Restructured,Headache specify - Photophobia,headache_specify___5,headache_specify___3,ha_photophobia,"Year 1 ___5 remapped to Year 2 ___3 numbering"
+Restructured,Headache specify - Phonophobia,headache_specify___6,headache_specify___4,ha_phonophobia,"Year 1 ___6 remapped to Year 2 ___4 numbering"
+Restructured,Headache specify - Bilateral,headache_specify___1,current_headache___8,ha_bilateral,"Year 1: in headache_specify; Year 2: in current_headache"
+Restructured,Headache specify - Unilateral,headache_specify___2,current_headache___9,ha_unilateral,"Year 1: in headache_specify; Year 2: in current_headache"
+Restructured,Headache location - Frontal,—,current_headache___10,ha_frontal,Year 2 only; Year 1 set to 0
+Restructured,Headache location - Temporal,—,current_headache___11,ha_temporal,Year 2 only; Year 1 set to 0
+Restructured,Headache location - Occipital,—,current_headache___12,ha_occipital,Year 2 only; Year 1 set to 0
+Restructured,Headache - Maximal at onset,current_headache___1,current_headache___1,ha_maximal_onset,Direct mapping (same ___1-7 in both years)
+Restructured,Headache - Progressive days,current_headache___2,current_headache___2,ha_progressive_days,Direct mapping
+Restructured,Headache - Progressive months,current_headache___3,current_headache___3,ha_progressive_months,Direct mapping
+Restructured,Headache - Non-progressive,current_headache___4,current_headache___4,ha_non_progressive,Direct mapping
+Restructured,Headache - Abrupt onset,current_headache___5,current_headache___5,ha_abrupt_onset,Direct mapping
+Restructured,Headache - Gradual onset,current_headache___6,current_headache___6,ha_gradual_onset,Direct mapping
+Restructured,Investigations - EEG,investigations___1,investigations___1,inv_eeg,Direct mapping
+Restructured,Investigations - CT,investigations___2,investigations___2,inv_ct,Direct mapping
+Restructured,Investigations - LP,investigations___3,investigations___3,inv_lp,Direct mapping
+Restructured,Investigations - MRI,investigations___4,investigations___4,inv_mri,Direct mapping
+Restructured,Investigations - Specific treatment,investigations___7,investigations___5,inv_specific_tx,"Year 1 ___7 remapped to Year 2 ___5"
+Restructured,Investigations - CTA,investigations___8,investigations___6,inv_cta,"Year 1 ___8 remapped to Year 2 ___6"
+Restructured,Investigations - MRA,investigations___9,investigations___7,inv_mra,"Year 1 ___9 remapped to Year 2 ___7"
+Restructured,Investigations - Angiography,investigations___10,investigations___8,inv_angiography,"Year 1 ___10 remapped to Year 2 ___8"
+Restructured,Consultation,investigations___5 (embedded) + consult_specify (free text),consult (yes/no) + consult_specify___1-8 (checkboxes),consult + consult_specify___1-8,"Year 1: consultation embedded in investigations field; extracted to separate field. Checkbox breakdown not available for Year 1 (free text only)."
+Restructured,Admission,"investigations___6 (embedded) + admission_icu (yes/no)","admit (yes/no) + admit_location___1-5 (checkboxes)","admit + admit_location___1-5","Year 1: admission embedded in investigations field; ICU admission from separate field. Ward admission available Year 2 only."
+Restructured,Discharge referrals,discharge_refer_specify (free text),discharge_refer_specify___1-5 (checkboxes),discharge_refer_specify___1-5,"Year 1 is free text; Year 2 is structured checkboxes. LLM coding harmonizes Year 1 text."
+Year-specific,Visit relatedness,—,related (yes/no),related,"Year 2 only; Year 1 assumed all pre-screened"
+Year-specific,Diastolic BP,—,dias_bp,dias_bp,"Year 2 only; not used as predictor in combined model"
+Year-specific,Other MI category,—,med_imp_dx___11,med_imp_dx___11,"Year 2 only; Year 1 has no 'other' MI category"
+Year-specific,Benign option 6,—,med_benign___6,med_benign___6,"Year 2 only; Year 1 used option 5 (Other) for overflow"
+Year-specific,Epilepsy not described,—,epilepsy_describe___3,epilepsy_describe___3,"Year 2 only; Year 1 had Focal/Generalized only"
+Year-specific,Differential diagnosis,—,diff_dx + diffdx_specify,diff_dx,"Year 2 only"
+Derived,Any neuroimaging,—,—,any_neuroimaging,"max(inv_ct, inv_mri, inv_cta, inv_mra)"
+Derived,Any headache symptom,—,—,sx_any_headache,"symptoms___10 OR symptoms___11"
+Derived,Any previous diagnosis,—,—,any_prev_dx,"max(previous_diagnoses___1-6)"
+Derived,Age under 12,—,—,age_under_12,"age < 12"
+Derived,ICU admission,admission_icu,admit_location___2 or ___3,icu_any,"Harmonized from year-specific sources"
+Derived,Any admission,investigations___6 or admission_icu,admit,admit_any,"Harmonized from year-specific sources"
+Derived,MI outcome,med_important_diagnosis___1-10,med_imp_dx___1-11,outcome_med_important,"max of all MI checkbox fields"
+Derived,Abnormal imaging,—,—,outcome_abnormal_imaging,"results == 2 (among imaged)"
+Derived,MI imaging,—,—,outcome_mi_imaging,"med_import == 1"

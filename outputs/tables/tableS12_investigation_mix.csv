@@ -1,0 +1,9 @@
+Investigation,Column,N,Rate (all patients),Rate (among investigated)
+Ct Head,inv_ct,354,16.4%,75.2%
+Mri Brain,inv_mri,102,4.7%,21.7%
+Cta Head,inv_cta,10,0.5%,2.1%
+Mra Head,inv_mra,5,0.2%,1.1%
+Lp,inv_lp,59,2.7%,12.5%
+Eeg,inv_eeg,54,2.5%,11.5%
+Consultation (Y2 only),consult,264,23.8% (of Y2),—
+Any investigation,—,471,21.9%,100.0%

@@ -1,0 +1,7 @@
+Metric,LR mean,LR SD,XGBoost mean,XGBoost SD,XGBoost (F2-opt) mean,XGBoost (F2-opt) SD
+Accuracy,93.5%,1.0%,94.5%,1.6%,90.7%,2.7%
+Sensitivity,15.0%,10.5%,43.6%,12.4%,74.2%,12.1%
+Specificity,99.3%,0.6%,98.2%,1.0%,91.9%,2.5%
+F2,17.5%,11.9%,46.5%,12.7%,63.6%,10.1%
+Auroc,82.5%,6.0%,90.5%,4.9%,90.5%,4.9%
+Threshold,0.50,,0.50,,0.09,

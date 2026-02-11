@@ -1,0 +1,13 @@
+Analysis,Metric,Primary (N=147 MI),Restrictive (N=113 MI),Delta
+XGBoost 10-fold nested CV,Accuracy,94.5% (+/-1.6%),94.6% (+/-0.6%),+0.1pp
+XGBoost 10-fold nested CV,Sensitivity,43.6% (+/-12.4%),19.5% (+/-11.3%),-24.1pp
+XGBoost 10-fold nested CV,Specificity,98.2% (+/-1.0%),98.7% (+/-0.5%),+0.5pp
+XGBoost 10-fold nested CV,F2,46.5% (+/-12.7%),21.7% (+/-11.5%),-24.8pp
+XGBoost 10-fold nested CV,Auroc,90.5% (+/-4.9%),87.3% (+/-5.7%),-3.2pp
+Temporal validation (Y1->Y2),Accuracy,93.9%,95.0%,+1.1pp
+Temporal validation (Y1->Y2),Sensitivity,47.2%,31.2%,-16.0pp
+Temporal validation (Y1->Y2),Specificity,97.1%,97.8%,+0.7pp
+Temporal validation (Y1->Y2),F2,48.3%,32.6%,-15.7pp
+Temporal validation (Y1->Y2),Auroc,88.9%,83.2%,-5.7pp
+Clinical prediction rule,AUROC (10-fold CV),0.850 (+/-0.056),0.808 (+/-0.059),-0.042
+Clinical prediction rule,Specificity at 90% sensitivity,21.9%,21.4%,-0.5pp

@@ -1,0 +1,5 @@
+Appropriateness,Code,N,N (%),"Imaged, n (%)","Abnormal imaging, n (%)","MI, n (%)",Imaging rate
+Usually NOT appropriate,1,580,580 (68.8%),61 (10.5%),10 (1.7%),5 (0.9%),10.5%
+May be appropriate,2,132,132 (15.7%),45 (34.1%),5 (3.8%),3 (2.3%),34.1%
+Usually appropriate,3,131,131 (15.5%),93 (71.0%),34 (26.0%),43 (32.8%),71.0%
+Chi-squared test,,,,χ²=226.3,p=<0.001,,

@@ -1,0 +1,11 @@
+Predictor,Beta,OR,Points,Direction
+sx_ataxia,2.295,9.92,7,risk
+exam_altered_loc,1.202,3.33,3,risk
+ems,0.829,2.29,2,risk
+sx_fever,0.644,1.90,2,risk
+sx_focal_weakness,0.872,2.39,3,risk
+exam_meningismus,1.850,6.36,5,risk
+sx_collapse,-1.921,0.15,-6,protective
+gender,-0.348,0.71,-1,protective
+sx_seizure,-0.665,0.51,-2,protective
+exam_papilledema,2.532,12.58,7,risk

@@ -1,0 +1,9 @@
+Metric,Derivation (Y1),Validation (Y2),Pooled (2-year CV)
+Accuracy,95.7%,93.4%,—
+Sensitivity,44.4%,25.0%,—
+Specificity,99.2%,97.2%,—
+PPV,80.0%,33.3%,—
+NPV,96.3%,95.9%,—
+AUROC,89.3%,81.9%,84.5%
+FNR,55.6%,75.0%,—
+IHC 2017 comparison,Accuracy 95.7% (vs 94.5%),FNR 75.0% (vs 33.3%),—

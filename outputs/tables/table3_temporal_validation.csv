@@ -1,0 +1,7 @@
+Metric,Pooled CV (XGBoost),Temporal (XGBoost),Temporal (LR)
+Accuracy,94.5% (+/-1.6%),93.9%,93.6%
+Sensitivity,43.6% (+/-12.4%),47.2%,13.9%
+Specificity,98.2% (+/-1.0%),97.1%,99.1%
+F2,46.5% (+/-12.7%),48.3%,16.3%
+Auroc,90.5% (+/-4.9%),88.9%,80.4%
+Confusion (XGBoost),—,"TP=34, FP=30, FN=38, TN=1008",—

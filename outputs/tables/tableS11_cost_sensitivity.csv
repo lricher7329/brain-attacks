@@ -1,0 +1,28 @@
+Cost scenario,Threshold (%),Model,N flagged,MI detected,MI detected (%),Total cost,Cost/MI detected
+base,5%,XGBoost,419,122,83.0%,$69884,$573
+base,5%,Logistic regression,703,108,73.5%,$117251,$1086
+base,5%,Clinical score,561,117,79.6%,$93567,$800
+base,10%,XGBoost,251,106,72.1%,$41863,$395
+base,10%,Logistic regression,313,86,58.5%,$52204,$607
+base,10%,Clinical score,244,93,63.3%,$40696,$438
+base,20%,XGBoost,165,87,59.2%,$27520,$316
+base,20%,Logistic regression,147,63,42.9%,$24518,$389
+base,20%,Clinical score,175,81,55.1%,$29188,$360
+mid,5%,XGBoost,419,122,83.0%,$225657,$1850
+mid,5%,Logistic regression,703,108,73.5%,$378608,$3506
+mid,5%,Clinical score,561,117,79.6%,$302133,$2582
+mid,10%,XGBoost,251,106,72.1%,$135179,$1275
+mid,10%,Logistic regression,313,86,58.5%,$168570,$1960
+mid,10%,Clinical score,244,93,63.3%,$131409,$1413
+mid,20%,XGBoost,165,87,59.2%,$88863,$1021
+mid,20%,Logistic regression,147,63,42.9%,$79168,$1257
+mid,20%,Clinical score,175,81,55.1%,$94248,$1164
+high,5%,XGBoost,419,122,83.0%,$334045,$2738
+high,5%,Logistic regression,703,108,73.5%,$560463,$5189
+high,5%,Clinical score,561,117,79.6%,$447254,$3823
+high,10%,XGBoost,251,106,72.1%,$200108,$1888
+high,10%,Logistic regression,313,86,58.5%,$249537,$2902
+high,10%,Clinical score,244,93,63.3%,$194528,$2092
+high,20%,XGBoost,165,87,59.2%,$131545,$1512
+high,20%,Logistic regression,147,63,42.9%,$117195,$1860
+high,20%,Clinical score,175,81,55.1%,$139518,$1722

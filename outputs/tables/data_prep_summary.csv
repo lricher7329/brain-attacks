@@ -1,0 +1,9 @@
+metric,value
+raw_total,2329
+excluded_trauma,176
+after_exclusions,2153
+final_analytic_n,2153
+n_medically_important,147
+n_year1,1043
+n_year2,1110
+n_columns,268

@@ -1,0 +1,145 @@
+# LLM-PI Agreement Metrics
+# Model: claude-haiku-4-5-20251001
+# Cases reviewed by PI: 123
+
+metric,value
+Total cases reviewed,123
+Cases with LLM-PI agreement,51
+Percent agreement (case-level),41.5%
+Percent agreement (record-weighted),21.4%
+Cohen's kappa,0.079
+"Confusion: LLM=MI, PI=MI (true positive)",42
+"Confusion: LLM=MI, PI=Benign (false positive)",72
+"Confusion: LLM=Benign, PI=MI (false negative)",0
+"Confusion: LLM=Benign, PI=Benign (true negative)",9
+
+# By-task breakdown
+task,n_cases,n_agree,pct_agree,n_llm_mi,n_pi_mi
+A,47,26,55.319148936170215,38,17
+E,76,25,32.89473684210527,76,25
+
+# Per-case detail
+task,text,n_records,llm_suggestion,pi_decision,agree
+A,seizure,5,benign,benign,True
+A,r/o meningitis,2,mi,benign,False
+A,shunt malfunction,2,mi,mi,True
+A,vision loss,2,mi,mi,True
+A,diploplia,1,benign,benign,True
+A,headache,1,benign,benign,True
+A,headache ?migraine,1,benign,benign,True
+A,multiple seizures (gtc),1,benign,benign,True
+A,neuropathy-nyd,1,benign,benign,True
+A,new onset seizures,1,benign,benign,True
+A,r/o complicated pneumonia,1,benign,benign,True
+A,syncope,1,benign,benign,True
+A,1) ?aphasia 2) ?migraine,1,mi,benign,False
+A,? papilledema nyd,1,mi,mi,True
+A,? transverse myelitis,1,mi,mi,True
+A,? vertebral artery dissection,1,mi,mi,True
+A,abnormal mri,1,mi,mi,True
+A,binocular diploplia nyd,1,mi,benign,False
+A,brain lesion,1,mi,mi,True
+A,cerebellitis,1,mi,mi,True
+A,decreased tone,1,mi,benign,False
+A,developmental regression,1,mi,mi,True
+A,fever r/o meningitis,1,mi,benign,False
+A,gait disturbance,1,mi,benign,False
+A,"gtc sz, r/o meningitis",1,mi,benign,False
+A,hallucinations/ha,1,mi,benign,False
+A,infection,1,mi,benign,False
+A,loc unknown cause,1,mi,benign,False
+A,meningitis prophylaxis,1,mi,benign,False
+A,migraine/aphasia,1,mi,benign,False
+A,neonatal sepsis,1,mi,mi,True
+A,nystagmus,1,mi,benign,False
+A,optic neuritis,1,mi,mi,True
+A,papilledema,1,mi,mi,True
+A,pseudotumor cerebri,1,mi,mi,True
+A,pseudotumor cerebri/idiopathic intracranial hypertension,1,mi,mi,True
+A,query svt (venous sinus thrombosis),1,mi,mi,True
+A,r eye deviation nyd,1,mi,benign,False
+A,r/o intracranial bleed,1,mi,benign,False
+A,r/o meningtiis,1,mi,benign,False
+A,r/o sepsis/meningitis,1,mi,benign,False
+A,r/o shunt malfunction,1,mi,benign,False
+A,r/o stroke,1,mi,benign,False
+A,radiation necrosis,1,mi,mi,True
+A,rule out meningitis,1,mi,benign,False
+A,"unsteadiness, abnormal eeg",1,mi,benign,False
+A,vp shunt malfunction,1,mi,mi,True
+E,altered loc,4,mi,benign,False
+E,altered level of consciousness,3,mi,benign,False
+E,shunt malfunction,3,mi,mi,True
+E,vision loss,2,mi,mi,True
+E,weakness nyd,1,mi,benign,False
+E,unknown aetiology,1,mi,benign,False
+E,pseudotumor cerebri,1,mi,mi,True
+E,benign intracranial hypertension,1,mi,mi,True
+E,fever (r/o meningitis)/hyponatremia/uti,1,mi,mi,True
+E,pseudotumor cerebri/idiopathic intracranial hypertension,1,mi,mi,True
+E,r/o meningitis,1,mi,mi,True
+E,vp shunt malfunction,1,mi,mi,True
+E,cerebellitis,1,mi,mi,True
+E,sepsis r/o meningitis,1,mi,mi,True
+E,altered loc nyd,1,mi,benign,False
+E,h influenza sepsis,1,mi,mi,True
+E,transverse myelitis,1,mi,mi,True
+E,"ataxia, 6th nerve palsy",1,mi,mi,True
+E,loss of consciousness,1,mi,benign,False
+E,papilledema,1,mi,mi,True
+E,aphasia,1,mi,benign,False
+E,optic neuritis,1,mi,mi,True
+E,cerebellar ataxia,1,mi,mi,True
+E,vertigo/ataxia,1,mi,mi,True
+E,visual disturbance/ataxia,1,mi,mi,True
+E,acute cerebellar ataxia,1,mi,mi,True
+E,syncope,141,mi,benign,False
+E,fever,15,mi,benign,False
+E,ataxia,12,mi,mi,True
+E,viral illness,9,mi,benign,False
+E,paresthesia,7,mi,benign,False
+E,vomitting,5,mi,benign,False
+E,vertigo,4,mi,benign,False
+E,infection,4,mi,benign,False
+E,viral infection,3,mi,benign,False
+E,loss of consciousness nyd,3,mi,benign,False
+E,seizure,2,mi,benign,False
+E,blurry vision,2,mi,benign,False
+E,diploplia,2,mi,benign,False
+E,photophobia,2,mi,benign,False
+E,anisocoria,2,mi,benign,False
+E,ataxia nyd,2,mi,mi,True
+E,neck pain,1,mi,benign,False
+E,dysesthetic pain,1,mi,benign,False
+E,visual hallucinations,1,mi,benign,False
+E,syncope and eating disorder,1,mi,benign,False
+E,syncope/seizure,1,mi,benign,False
+E,vasovagal syncope vrs seizure?,1,mi,benign,False
+E,fainting spell? breath holding vas seizure,1,mi,benign,False
+E,syncope;weakness;eating disorder,1,mi,benign,False
+E,pancytopenia; thrombocytopenia,1,mi,benign,False
+E,loc unknown cause,1,mi,benign,False
+E,syncopal seizure,1,mi,benign,False
+E,r/o seizure,1,mi,benign,False
+E,ataxia and weakness,1,mi,mi,True
+E,? papilledema nyd,1,mi,mi,True
+E,r/o leukocoria,1,mi,benign,False
+E,r leg dysesthesia/weakness,1,mi,benign,False
+E,r eye deviation nyd,1,mi,benign,False
+E,binocular diploplia nyd,1,mi,benign,False
+E,? weakness r side,1,mi,benign,False
+E,acute otitis media,1,mi,benign,False
+E,hallucinations,1,mi,benign,False
+E,diplopia,1,mi,benign,False
+E,"macrocytic anemia, developmental delay",1,mi,benign,False
+E,gait disturbance,1,mi,benign,False
+E,decreased tone,1,mi,benign,False
+E,spasms/myoclonus,1,mi,benign,False
+E,abnormal movements,1,mi,benign,False
+E,post-viral ataxia,1,mi,mi,True
+E,apnea,1,mi,benign,False
+E,? ataxia,1,mi,mi,True
+E,nystagmus,1,mi,benign,False
+E,visual symptoms nyd,1,mi,benign,False
+E,delirium,1,mi,benign,False
+E,visual complaints - nyd,1,mi,benign,False
