@@ -7,3 +7,13 @@
 /csv
 /parquet
 .DS_Store
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Record-level outputs: never commit (HIA / ethics PRO00055264). Keep local only.
+outputs/tables/qc_mi_report.csv
+outputs/tables/qc_mi_summary.md
+outputs/tables/table_cinp_adjudication.csv
+outputs/tables/table_ciip_ca_verification.csv
