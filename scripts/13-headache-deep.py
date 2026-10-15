@@ -891,8 +891,8 @@ def headache_decision_curve(model_data):
     ax.grid(alpha=0.2)
 
     ax.axvline(x=prevalence * 100, color="gray", linestyle=":", alpha=0.4)
-    ax.text(prevalence * 100 + 0.5, ax.get_ylim()[1] * 0.9,
-            f"Prevalence\n({100*prevalence:.1f}%)", fontsize=8, color="gray")
+    ax.text(prevalence * 100 + 0.5, ax.get_ylim()[0] * 0.5,
+            f"MI rate\n({100*prevalence:.1f}%)", fontsize=8, color="gray")
 
     fig.tight_layout()
     fig.savefig(FIGURES / "fig_ha_decision_curve.png")

@@ -1,9 +1,9 @@
 # Brain AttACKs Data Analysis Plan
 
-**Study:** Prediction of Medically Important Pediatric Brain Attack Based on Presenting Characteristics
+**Study:** Prediction of Clinically Important Neurologic Presentation in Children with Acute Brain Attack
 **Protocol:** v1.1 (May 19, 2016) | PRO00055264
 **Manuscript target:** Pediatrics (AAP)
-**Date:** 2026-02-10
+**Date:** 2026-02-12
 
 ---
 
@@ -17,7 +17,7 @@ Cases were identified from the Stollery Children's Hospital ED census using ICD-
 
 - **Year 1:** `BrainAttACKs_DATA_2024-11-18_1011.csv` — 1,124 records, 158 columns
 - **Year 2:** `BrainAttACKsYear2_DATA_2024-11-18_1013.csv` — 1,205 records, 191 columns
-- **Combined N (post-exclusion):** 2,153 (147 medically important after PI review, 2,006 medically unimportant)
+- **Combined N (post-exclusion):** 2,153 (147 CINP [clinically important neurologic presentation] after PI review, 2,006 non-CINP; 121 CIIP [clinically important intracranial pathology])
 
 ## 1b. Reporting Standards
 
@@ -56,7 +56,7 @@ Per protocol, the study has four aims. These are organized below with references
 
 | # | Objective | Status |
 |---|-----------|--------|
-| 1 | Determine clinical predictors of medically important brain attack and derive a clinical prediction rule | Completed (manuscript draft: XGBoost + logistic regression on combined cohort) |
+| 1 | Determine clinical predictors of clinically important neurologic presentation (CINP) and derive a clinical prediction rule | Completed (manuscript draft: XGBoost + logistic regression on combined cohort) |
 | 2 | Validate clinical predictors using Year 2 as temporal validation cohort | Completed (`04-validation.py`: XGBoost + LR temporal Y1→Y2, `tableS5_case_mix_y1_vs_y2.csv`) |
 | 3 | Determine clinical predictors of abnormal neuroimaging | Completed (`05-neuroimaging.py`: univariate + multivariate predictors, neuroimaging yield) |
 | 4 | Describe the epidemiology of brain attack (incidence, symptoms, etiologies, practice variation, neuroimaging use) | Completed (`02-descriptive.py`: Table 1 demographics, Table S2 practice variation, investigation mix) |
@@ -334,9 +334,36 @@ The CRF uses conditional display logic: fields are only shown (and therefore onl
 
 ## 7. Outcome Definitions
 
-### 7.1 Primary Outcome: Medically Important Brain Attack
+### 7.1 Primary Outcome: Clinically Important Neurologic Presentation (CINP)
 
-A case is **medically important** if any medically important diagnosis checkbox is checked.
+CINP is a decision-based composite outcome answering the clinical question: "Does this child require urgent neurodiagnostic investigation?" A case meets CINP criteria if **either** criterion is satisfied:
+
+- **Criterion 1 (CIIP):** Confirmed intracranial pathology requiring treatment or ongoing management (see Section 7.2)
+- **Criterion 2 (Objective finding):** Documented objective neurologic finding that mandates investigation to exclude serious intracranial pathology, even if no pathology is ultimately confirmed
+
+**Qualifying objective neurologic findings for Criterion 2:**
+
+| Finding | Column |
+|---------|--------|
+| Cerebellar ataxia | `sx_ataxia` |
+| Focal weakness | `sx_focal_weakness` |
+| Sensory disturbance | `sx_sensory` |
+| Speech disturbance | `sx_speech` |
+| Visual disturbance | `sx_visual` |
+| Eye movement abnormality | `sx_eye_movement` |
+| Altered consciousness (symptom) | `sx_altered_consciousness` |
+| Altered LOC (exam) | `exam_altered_loc` |
+| Papilledema | `exam_papilledema` |
+| Meningismus | `exam_meningismus` |
+| Seizure | `sx_seizure` |
+
+**Circularity avoidance:** CINP is defined by the clinical presentation (documented findings), NOT by post-presentation decisions (imaging ordered, neurology consulted, admission). This prevents the outcome from being determined by the very decisions the model aims to support.
+
+**Implementation:** The original `outcome_med_important` variable (MI, N=147) is numerically equivalent to CINP because all 121 CIIP cases qualify via Criterion 1, and all 26 cerebellar ataxia cases (which are the only MI cases not meeting CIIP) qualify via Criterion 2 (all have documented `sx_ataxia = 1`). This equivalence is verified by `scripts/21-cinp-framework.py`.
+
+Binary outcome: `outcome_cinp` = `outcome_med_important` = 1 if CINP criteria met, else 0. (N=147, 6.8%)
+
+**REDCap source fields:** The underlying diagnostic codes remain as follows:
 
 | Code | Diagnosis | Year 1 field | Year 2 field |
 |------|-----------|-------------|-------------|
@@ -356,14 +383,32 @@ A case is **medically important** if any medically important diagnosis checkbox 
 
 Codes 12 and 13 are derived from code 11 sub-types by `apply_pi_review()` in 01-data-prep.py.
 
-Binary outcome: `outcome_med_important` = 1 if any of the above = 1, else 0.
+### 7.2 Secondary Outcome: Clinically Important Intracranial Pathology (CIIP)
 
-### 7.2 Secondary Outcomes
+CIIP is the strict pathology-confirmed endpoint: confirmed intracranial pathology requiring treatment or ongoing management. A case meets CIIP criteria if it has an MI diagnosis (any `med_imp_dx` checkbox) AND is NOT reclassified by the CIIP algorithm in `scripts/17-ciip-reclassification.py`.
+
+**CIIP reclassification logic:** Cerebellar ataxia cases (code 13) are reclassified as non-CIIP unless:
+- They have another MI diagnosis code (codes 1-12), OR
+- They have both abnormal imaging AND specific treatment
+
+Binary outcome: `outcome_ciip` = 1 if CIIP criteria met, else 0. (N=121, 5.6%)
+
+**Relationship:** CIIP is a subset of CINP. All CIIP cases are CINP (via Criterion 1). CINP cases that are not CIIP (N=26) are cerebellar ataxia presentations meeting Criterion 2 only.
+
+### 7.3 Other Secondary Outcomes
 
 - **Abnormal neuroimaging:** `results == 2` (among those who had imaging)
 - **Medically important abnormal imaging:** `med_import == 1`
 - **ICU admission:** `icu_any` (harmonized, see 4.2)
 - **Any admission:** Year 2 `admit == 1`; Year 1 derived from `investigations___6` or `admission_icu`
+
+### 7.4 CINP Adjudication
+
+`scripts/21-cinp-framework.py` generates:
+- `data/processed/brain_attacks_cinp.parquet` — dataset with `outcome_cinp` and `outcome_ciip` columns
+- `outputs/tables/table_cinp_adjudication.csv` — per-case adjudication (record_id, year, objective findings, imaging, therapy, CINP status, CIIP status, reason)
+- `outputs/tables/table_cinp_vs_mi_vs_ciip.csv` — three-way metric comparison using existing analysis results
+- `outputs/cinp_methods_text.md` — publication-ready rationale paragraph
 
 ## 8. Analysis Pipeline
 
@@ -396,31 +441,34 @@ scripts/01-data-prep.py
    - Impute continuous variables with median (per manuscript: temp 172, hr 163, ctas 54 missing in benign group)
    - Remove records with missing gender (1 case per manuscript)
 7. **Cohort tagging:** Add `year` column (1 or 2)
-8. **Validation:** Compare rebuilt cohort counts against manuscript (N=2,153; 113 medically important) to confirm concordance. Flag and investigate any discrepancies.
+8. **Validation:** Compare rebuilt cohort counts against manuscript (N=2,153; 147 CINP after PI review, 121 CIIP) to confirm concordance. Flag and investigate any discrepancies.
 9. **Export:** Combined analytic dataset + year-specific datasets as CSV and parquet to `data/processed/`
 
 #### 8.1.1 Sample Size Justification (TRIPOD+AI Item 11)
 
 Report the effective sample size relative to the number of candidate predictors and outcome events. For the primary analysis:
 
-- **Events (MI cases):** 147
-- **Non-events (benign):** 2,006
-- **Candidate predictors:** 33 (12 symptom + 3 exam + 15 headache + 6 demographic + 2 other — per `get_feature_names()`)
-- **Events per variable (EPV):** 147 / 33 = 4.5
+- **Events (CINP cases):** 147
+- **Non-events (non-CINP):** 2,006
+- **Candidate predictors (raw features):** 55 (11 symptom + 18 other symptom + 3 exam + 15 headache + 6 demographic + 2 other — per `get_feature_names()` in `scripts/11-stability.py`)
+- **Events per variable (EPV) for 55 features:** 147 / 55 = 2.7
 
-EPV < 10 indicates a risk of model overfitting for traditional logistic regression (Peduzzi et al., 1996). For the XGBoost model, the nested CV with SMOTE partially mitigates this, but the low EPV must be acknowledged as a limitation. For the clinical prediction rule (10 predictors), EPV = 147 / 10 = 14.7, which is adequate.
+EPV < 10 indicates a risk of model overfitting for traditional logistic regression (Peduzzi et al., 1996). For the XGBoost model, the nested CV with SMOTE partially mitigates this via internal regularisation (max_depth, learning_rate constraints), reducing effective degrees of freedom below the nominal 55 features. For the clinical prediction rule (10 predictors), EPV = 147 / 10 = 14.7, which is adequate.
 
 **Riley et al. (2020) minimum sample size (pmsampsize, R 4.5.2):**
 
+The Riley calculation uses 33 effective parameters — the expected number after XGBoost's internal regularisation reduces the 55 raw features to approximately 33 effective degrees of freedom. This estimate is based on the observed feature importance distribution where ~33 features carry non-negligible importance weights.
+
 Using `pmsampsize` with prevalence = 0.0683, target C-statistic = 0.90:
 
-| Model | Predictors | Min N | Min events | EPP | Actual N | Actual events | Adequate? |
+| Model | Parameters | Min N | Min events | EPP | Actual N | Actual events | Adequate? |
 |-------|-----------|-------|------------|-----|----------|---------------|-----------|
-| Full (XGBoost/LR) | 33 | 1,644 | 113 | 3.4 | 2,153 | 147 | Yes |
+| Full (33 effective) | 33 | 1,644 | 113 | 3.4 | 2,153 | 147 | Yes |
+| Full (55 raw features) | 55 | 2,738 | 188 | 3.4 | 2,153 | 147 | No — shortfall of 41 events |
 | Clinical score | 10 | 499 | 35 | 3.4 | 2,153 | 147 | Yes |
 | Full (conservative, C=0.85) | 33 | 2,372 | 163 | 4.9 | 2,153 | 147 | No — shortfall of 16 events |
 
-The actual sample (N=2,153, 147 events) meets the Riley criteria for the target C-statistic of 0.90 with both 33- and 10-predictor models. Under a conservative assumption (C=0.85), the full model falls slightly short (147 vs 163 required events), which should be acknowledged as a limitation alongside the low traditional EPV (4.5).
+The actual sample (N=2,153, 147 events) meets the Riley criteria for the target C-statistic of 0.90 with 33 effective parameters. Under the full 55-feature count, the sample falls short (147 vs 188 required events), which must be acknowledged as a limitation. The traditional EPV for 55 features is 2.7, well below the conventional threshold of 10. XGBoost's internal regularisation and nested CV partially mitigate overfitting risk, but this remains the study's primary statistical limitation.
 
 **Reference:** Riley RD, et al. Calculating the sample size required for developing a clinical prediction model. BMJ. 2020;368:m441. [Zotero: `H44ZUWJ6`]
 
@@ -458,11 +506,11 @@ Year 1 raw (1,124) + Year 2 raw (1,205)
     └─ Excluded: no doctor seen (n=TBD)
     |
     = Analytic cohort (2,153)
-        ├─ MI after PI review: 147 (6.8%)
-        └─ Benign: 2,006 (93.2%)
+        ├─ CINP after PI review: 147 (6.8%) [of which CIIP: 121 (5.6%)]
+        └─ Non-CINP: 2,006 (93.2%)
         |
-        ├─ Year 1 (derivation): n=TBD (MI=TBD)
-        └─ Year 2 (validation): n=TBD (MI=TBD)
+        ├─ Year 1 (derivation): n=1,043 (CINP=75)
+        └─ Year 2 (validation): n=1,110 (CINP=72)
 ```
 
 **Implementation:** Add flow diagram generation to `01-data-prep.py` or create a dedicated figure script using matplotlib. Populate TBD values from the `flow` dictionary.
@@ -477,11 +525,11 @@ scripts/02-descriptive.py
 
 **Case ascertainment (RECORD Item 6.1):** The manuscript methods must describe how "brain attack" presentations were identified from the ED census. Specifically: (a) the screening criteria used to identify eligible presentations from the ED tracking system, (b) who performed the screening (research assistant, physician, automated), (c) the time period of enrollment, (d) whether screening was prospective or retrospective chart review, and (e) any validation of the screening process (e.g., sensitivity of the identification method). This information comes from the study protocol (PRO00055264) and should be reported verbatim in the Methods section.
 
-1. **Demographics table (Table 1):** Age, gender, vitals, CTAS by medically important vs. benign
+1. **Demographics table (Table 1):** Age, gender, vitals, CTAS by CINP vs. non-CINP
    - Continuous: mean +/- SD, range; two-sample t-test
    - Categorical: n (%); chi-squared or Fisher exact test
    - Report overall and stratified by year
-2. **Diagnosis distribution (Table 2):** Frequency of each medically important subtype
+2. **Diagnosis distribution (Table 2):** Frequency of each CINP subtype (with CIIP status indicated)
 3. **Symptom prevalence:** Frequency of each presenting symptom by outcome group
 4. **Practice variation:**
    - Neuroimaging rates (CT, MRI, CTA, MRA) overall and by presenting symptom
@@ -565,7 +613,7 @@ scripts/04-validation.py
 3. **Report:** accuracy, sensitivity, specificity, F2-score, AUROC, confusion matrix — all with 95% bootstrap CIs (1,000 iterations)
 4. **Compare** Year 2 validation performance to pooled cross-validated performance
 5. **Sensitivity analysis:** Repeat with logistic regression for comparison
-6. **Case-mix comparison (TRIPOD+AI Item 22):** Compare Year 1 vs Year 2 baseline characteristics (demographics, symptom prevalence, MI rate) using standardized mean differences. Report as a supplementary table. Any differences inform interpretation of validation performance (e.g., if MI prevalence differs between years, calibration-in-the-large may shift).
+6. **Case-mix comparison (TRIPOD+AI Item 22):** Compare Year 1 vs Year 2 baseline characteristics (demographics, symptom prevalence, CINP rate) using standardized mean differences. Report as a supplementary table. Any differences inform interpretation of validation performance (e.g., if CINP prevalence differs between years, calibration-in-the-large may shift).
 7. **Calibration in validation:** Generate calibration plot for Year 2 predictions. Report calibration-in-the-large and calibration slope in the validation cohort. These are critical — a model can maintain discrimination (AUROC) while losing calibration when applied to new data.
 8. **Optimism-corrected performance:** Report bootstrap optimism-corrected AUROC from the derivation cohort to estimate expected shrinkage in new data.
 
@@ -615,7 +663,7 @@ scripts/07-headache.py
 **This extends the IHC 2017 abstract analysis to the full 2-year dataset.** The original analysis used Year 1 only (n=630 headache cases) with stepwise logistic regression (66/33 split). The current analysis uses both years.
 
 1. **Cohort:** Restrict to patients with headache as a presenting symptom (`symptoms___10 == 1` OR `symptoms___11 == 1`), excluding those with prior headache disorder (e.g., `previous_diagnoses___4` (migraine) or `previous_diagnoses___5` (recurring headache))
-2. **Outcome:** Medically/surgically urgent secondary cause (same definition as primary outcome)
+2. **Outcome:** CINP (same definition as primary outcome)
 3. **Predictors** (replicating IHC 2017 model):
    - Demographics: age (<12 vs >=12), gender, EMS transport
    - History: prior headache
@@ -627,35 +675,53 @@ scripts/07-headache.py
 7. **Comparison:** Compare 2-year model performance to original IHC 2017 results
 8. **Neuroimaging impact:** Estimate reduction in imaging if model were applied (as per IHC 2017 conclusion)
 
-### 8.8 Sensitivity Analysis — MI Outcome Definition
+### 8.8 Sensitivity Analysis — Outcome Definition Hierarchy
 
 ```
 scripts/08-sensitivity.py
+scripts/17-ciip-reclassification.py
+scripts/18-ciip-ms1-reanalysis.py
+scripts/19-ciip-ms2-reanalysis.py
+scripts/20-ciip-comparison.py
+scripts/21-cinp-framework.py
 ```
 
-**Clinical rationale:** IIH (idiopathic intracranial hypertension) and cerebellar ataxia were elevated to distinct MI categories (codes 12 and 13) because of their diagnostic significance:
-- **IIH** requires LP for diagnosis and can damage vision — clinically distinct from other code-11 conditions
-- **Cerebellar ataxia** requires imaging to rule out posterior fossa tumour or ADEM — presentation mimics more serious pathology
+**Clinical rationale:** The study uses a hierarchical outcome framework:
 
-However, there is clinical debate about whether these conditions belong as medically important brain attacks. This sensitivity analysis tests the impact of excluding them on all key prediction results.
+| Outcome | Definition | N | Prevalence |
+|---------|-----------|---|-----------|
+| **CINP (primary)** | Requires urgent neurodiagnostic investigation (Criterion 1 OR 2) | 147 | 6.8% |
+| **CIIP (secondary)** | Confirmed intracranial pathology requiring treatment | 121 | 5.6% |
+| **CIIP excl. IIH** | CIIP excluding IIH (code 12, n=8) | 113 | 5.2% |
 
-**Two outcome definitions:**
-- **Primary:** All MI (N=147), including IIH (code 12, n=8) and cerebellar ataxia (code 13, n=26)
-- **Restrictive:** Excludes IIH and cerebellar ataxia (N≈113), matching the original manuscript MI count
+The 26 cases that are CINP but not CIIP are all cerebellar ataxia (code 13): documented ataxia mandates investigation (Criterion 2) but the condition is typically self-limiting (does not meet CIIP pathology threshold).
 
-**Analyses repeated under each definition:**
-1. XGBoost 10-fold nested CV (replicating 03-prediction.py logic): accuracy, sensitivity, specificity, F2, AUROC
-2. Temporal validation Year 1 → Year 2 (replicating 04-validation.py logic): same metrics
-3. Clinical prediction rule (replicating 06-prediction-rule.py logic): AUROC, key threshold performance
+**Sensitivity analyses:**
+
+1. **Primary (CINP, N=147):** All existing MI analyses serve as the CINP primary analysis (scripts 03-12). No reanalysis required because CINP = MI numerically.
+
+2. **Sensitivity 1 — CIIP (N=121):** Full reanalysis excluding cerebellar ataxia cases that lack imaging+treatment criteria. Implemented in:
+   - `scripts/17-ciip-reclassification.py` — creates `outcome_ciip` column and `brain_attacks_ciip.parquet`
+   - `scripts/18-ciip-ms1-reanalysis.py` — reruns XGBoost CV and temporal validation on CIIP outcome
+   - `scripts/19-ciip-ms2-reanalysis.py` — reruns penalized LR headache analysis on CIIP outcome
+   - `scripts/20-ciip-comparison.py` — generates side-by-side CINP vs CIIP comparison tables
+
+3. **Sensitivity 2 — CIIP excl. IIH (N=113):** Further excludes IIH cases. Implemented in `scripts/08-sensitivity.py`.
 
 **Design decisions:**
-- The restrictive outcome is derived dynamically from the parquet (no modification to 01-data-prep.py)
+- CINP = MI numerically, so no reanalysis of existing scripts is needed for the primary outcome
+- CIIP is derived by `scripts/17-ciip-reclassification.py` from the MI parquet
+- CINP adjudication is documented by `scripts/21-cinp-framework.py`
 - Uses the same feature set, SMOTE ratios, and hyperparameter grid as the primary analysis
-- Does NOT re-run the headache or neuroimaging analyses (those have different scope)
 
 **Outputs:**
-- `outputs/tables/table_sensitivity_analysis.csv` — side-by-side comparison of all metrics
-- `outputs/figures/fig_sensitivity_comparison.png` — grouped bar chart comparing primary vs restrictive
+- `outputs/tables/table_cinp_vs_mi_vs_ciip.csv` — three-way metric comparison
+- `outputs/tables/table_cinp_adjudication.csv` — per-case CINP adjudication
+- `outputs/tables/table_ciip_ms1_performance.csv` — CIIP XGBoost performance
+- `outputs/tables/table_ciip_ms2_pen_performance.csv` — CIIP penalized LR performance
+- `outputs/tables/table_master_mi_vs_ciip.csv` — comprehensive comparison
+- `outputs/tables/table_sensitivity_analysis.csv` — CIIP excl. IIH comparison
+- `outputs/figures/fig_sensitivity_comparison.png` — grouped bar chart
 
 ### 8.9 Calibration Assessment (New — TRIPOD+AI Item 23b)
 
@@ -697,7 +763,7 @@ scripts/10-decision-curve.py
 
 **Clinical utility assessment using decision curve analysis (Vickers & Elkin, 2006).** This evaluates the net benefit of using the prediction model to guide clinical decisions (e.g., ordering neuroimaging) across a range of threshold probabilities, compared to the default strategies of "investigate all" and "investigate none."
 
-**Rationale:** With MI prevalence of 6.8%, the clinical question is: at what threshold probability of MI should a clinician order neuroimaging or escalate care? Decision curve analysis answers this by plotting net benefit vs. threshold probability.
+**Rationale:** With CINP prevalence of 6.8%, the clinical question is: at what threshold probability of CINP should a clinician order neuroimaging or escalate care? Decision curve analysis answers this by plotting net benefit vs. threshold probability.
 
 **Models compared:**
 1. XGBoost (primary model)
@@ -746,7 +812,7 @@ scripts/11-stability.py
 scripts/12-cost-analysis.py
 ```
 
-**Extends the decision curve analysis (Section 8.10) by incorporating investigation costs.** Decision curves show net benefit in probability units; this analysis translates model performance into healthcare dollars — how much does it cost per MI case detected at each threshold, and what is the net monetary benefit of model-guided investigation versus investigate-all?
+**Extends the decision curve analysis (Section 8.10) by incorporating investigation costs.** Decision curves show net benefit in probability units; this analysis translates model performance into healthcare dollars — how much does it cost per CINP case detected at each threshold, and what is the net monetary benefit of model-guided investigation versus investigate-all?
 
 **Cost parameters:**
 
@@ -774,7 +840,7 @@ Pediatric modifier: +30% for patients ≤12 years (some diagnostic radiology cod
 **Key analyses:**
 
 1. **Observed investigation mix:** From `inv_ct`, `inv_mri`, `inv_lp`, `inv_eeg`, `inv_cta`, `inv_mra` — proportion receiving each investigation type among investigated vs. all patients.
-2. **Cost at each threshold (1–50%):** For XGBoost, LR, and clinical score: N flagged, mean investigation cost per flagged patient, total investigation cost, MI detected, MI missed, cost per MI detected.
+2. **Cost at each threshold (1–50%):** For XGBoost, LR, and clinical score: N flagged, mean investigation cost per flagged patient, total investigation cost, CINP detected, CINP missed, cost per CINP detected.
 3. **Net monetary benefit:** NMB(t) = (TP/N) × W_tp − (FP/N) × C_inv, across all thresholds and cost scenarios.
 
 **Consultation cost handling:** Subspecialty consultation data is available for Year 2 only. For Year 1, patients with `consult == 1` are assigned the Year 2 mean consultation cost. This is reported as a supplementary sensitivity analysis; the main analysis uses investigation costs only.
@@ -788,7 +854,7 @@ Pediatric modifier: +30% for patients ≤12 years (some diagnostic radiology cod
 | `tableS11_cost_sensitivity.csv` | Supp table | Results under 3 cost scenarios |
 | `tableS12_investigation_mix.csv` | Supp table | Observed investigation rates |
 | `fig_nmb_curve.png` | Figure (main) | Net monetary benefit vs. threshold, 3 models + investigate-all |
-| `fig_cost_per_case.png` | Figure (main) | Cost per MI detected vs. threshold |
+| `fig_cost_per_case.png` | Figure (main) | Cost per CINP detected vs. threshold |
 
 ### 8.13 Extended Headache Analysis (Manuscript 2)
 
@@ -801,16 +867,16 @@ scripts/13-headache-deep.py
 **Key analyses:**
 
 1. **Cohort selection:** Replicate from Section 8.7: `sx_any_headache == 1`, exclude prior headache disorder. Split Year 1 (derivation) / Year 2 (validation).
-2. **Expanded demographics:** Full headache cohort characteristics including investigation rates, consultation rates (Year 2), imaging appropriateness distribution, MI subtype breakdown.
+2. **Expanded demographics:** Full headache cohort characteristics including investigation rates, consultation rates (Year 2), imaging appropriateness distribution, CINP subtype breakdown.
 3. **Imaging appropriateness analysis:** Cross-tabulate `ni_appropriateness` (1=Usually NOT appropriate, 2=May be appropriate, 3=Usually appropriate) against:
    - `any_neuroimaging` (was imaging done?)
    - `outcome_abnormal_imaging` (was it abnormal?)
-   - `outcome_med_important` (was the case MI?)
+   - `outcome_med_important` (was the case CINP?)
    - Compute overtesting/undertesting rates, chi-squared tests.
 4. **Extended prediction model:** Use `EXTENDED_PREDICTORS` (21 vars) from Section 8.7. Add XGBoost comparison (new — 07-headache.py uses LR only). Derivation Year 1, validation Year 2. Bootstrap CIs.
 5. **Headache decision curve:** Net benefit for headache LR model vs. investigate-all-headache vs. investigate-none. Threshold range 1–30%.
 6. **Headache calibration:** Following pattern from Section 8.9.
-7. **Headache cost analysis:** Same cost framework as Section 8.12 applied to headache subgroup. Key question: "How many imaging studies could be avoided, at what cost saving, detecting what % of MI?"
+7. **Headache cost analysis:** Same cost framework as Section 8.12 applied to headache subgroup. Key question: "How many imaging studies could be avoided, at what cost saving, detecting what % of CINP?"
 
 **Outputs:**
 
@@ -825,7 +891,7 @@ scripts/13-headache-deep.py
 | `fig_ha_roc_extended.png` | Figure | ROC curves (LR + XGBoost, derivation + validation) |
 | `fig_ha_calibration.png` | Figure | Calibration plot |
 | `fig_ha_decision_curve.png` | Figure | Decision curve |
-| `fig_ha_cost_threshold.png` | Figure | Cost per MI detected vs. threshold |
+| `fig_ha_cost_threshold.png` | Figure | Cost per CINP detected vs. threshold |
 
 ## 9. Figures and Tables
 
@@ -853,10 +919,10 @@ scripts/13-headache-deep.py
 | Table 6 | Table | Headache sub-analysis: prediction model (2-year) | 07 |
 | Figure 7 | ROC curves | Headache model: derivation vs validation | 07 |
 | Table 7 | Table | Clinical prediction score weights and threshold performance | 06 |
-| Table 8 | Table | Sensitivity analysis: primary vs restrictive MI definition | 08 |
+| Table 8 | Table | Sensitivity analysis: CINP vs CIIP vs CIIP-excl-IIH | 08, 17-21 |
 | Table 9 | Table | Cost at key thresholds per model | 12 |
 | Figure 8 | Line plot | Net monetary benefit vs. threshold | 12 |
-| Figure 9 | Line plot | Cost per MI detected vs. threshold | 12 |
+| Figure 9 | Line plot | Cost per CINP detected vs. threshold | 12 |
 
 ### Additional Main Figures
 
@@ -900,7 +966,7 @@ scripts/13-headache-deep.py
 | Figure 2 | ROC curves | LR + XGBoost, derivation + validation | 13 |
 | Figure 3 | Calibration | Headache model calibration plot | 13 |
 | Figure 4 | Decision curve | Headache decision curve | 13 |
-| Figure 5 | Line plot | Cost per MI detected vs. threshold (headache) | 13 |
+| Figure 5 | Line plot | Cost per CINP detected vs. threshold (headache) | 13 |
 
 ## 10. Software and Reproducibility
 
@@ -928,12 +994,19 @@ brain-attacks/
 │   ├── 05-neuroimaging.py      # Predictors of abnormal neuroimaging
 │   ├── 06-prediction-rule.py   # Clinical score derivation
 │   ├── 07-headache.py          # Headache sub-analysis extending IHC 2017
-│   ├── 08-sensitivity.py       # Sensitivity analysis: MI outcome definition
+│   ├── 08-sensitivity.py       # Sensitivity analysis: CIIP excl. IIH outcome definition
 │   ├── 09-calibration.py       # Calibration assessment + bootstrap CIs (TRIPOD+AI)
 │   ├── 10-decision-curve.py    # Decision curve analysis / clinical utility
 │   ├── 11-stability.py         # Model stability, collinearity, optimism correction
 │   ├── 12-cost-analysis.py     # Cost-informed threshold analysis (Manuscript 1)
 │   ├── 13-headache-deep.py     # Extended headache analysis (Manuscript 2)
+│   ├── 15-headache-figures.py  # Headache manuscript figures
+│   ├── 16-penalized-lr-headache.py # Penalized LR headache model (Manuscript 2)
+│   ├── 17-ciip-reclassification.py # CIIP outcome reclassification
+│   ├── 18-ciip-ms1-reanalysis.py   # CIIP reanalysis for Manuscript 1
+│   ├── 19-ciip-ms2-reanalysis.py   # CIIP reanalysis for Manuscript 2
+│   ├── 20-ciip-comparison.py       # CINP vs CIIP comparison tables
+│   ├── 21-cinp-framework.py        # CINP adjudication framework + methods text
 │   └── qc-mi-classification.py # Line-by-line MI classification QC audit
 ├── outputs/
 │   ├── tables/                 # CSV tables + QC reports (see README.md for full list)
@@ -945,6 +1018,8 @@ brain-attacks/
 │   └── processed/
 │       ├── brain_attacks_combined.csv
 │       ├── brain_attacks_combined.parquet
+│       ├── brain_attacks_ciip.parquet      # CIIP-reclassified dataset (script 17)
+│       ├── brain_attacks_cinp.parquet      # CINP-adjudicated dataset (script 21)
 │       └── llm_coded/
 │           ├── task_a_diagnosis.csv       # LLM outcome validation
 │           ├── task_b_consult.csv         # LLM consultation coding
@@ -973,20 +1048,27 @@ brain-attacks/
 | 8 | 07 | Headache sub-analysis | Extends IHC 2017; potential secondary paper |
 | 9 | 05 | Neuroimaging predictors | Addresses protocol Objective 3 |
 | 10 | 06 | Clinical prediction rule + full model specification | Translational output |
-| 11 | 08 | Sensitivity analysis | Robustness of MI outcome definition |
+| 11 | 08 | Sensitivity analysis | Robustness across CINP/CIIP/CIIP-excl-IIH definitions |
 | 12 | 12 | Cost-informed threshold analysis | Translates model utility into healthcare dollars (Manuscript 1) |
 | 13 | 13 | Extended headache analysis | Deep headache paper: appropriateness, cost, prediction (Manuscript 2) |
+| 14 | 15 | Headache manuscript figures | Figures for Manuscript 2 |
+| 15 | 16 | Penalized LR headache model | Ridge-penalized LR for headache subgroup (Manuscript 2) |
+| 16 | 17 | CIIP reclassification | Reclassify cerebellar ataxia for CIIP secondary outcome |
+| 17 | 18 | CIIP MS1 reanalysis | Rerun XGBoost + clinical score on CIIP outcome |
+| 18 | 19 | CIIP MS2 reanalysis | Rerun penalized LR headache on CIIP outcome |
+| 19 | 20 | CINP vs CIIP comparison | Generate master comparison tables |
+| 20 | 21 | CINP framework | CINP adjudication, three-way comparison, methods text |
 
 ## 13. Key Limitations to Address in Manuscript Discussion
 
 The following limitations should be explicitly discussed in the manuscript, per TRIPOD+AI Item 26 and PROBAST:
 
 1. **Single-centre study:** All data from the Stollery Children's Hospital ED. Geographic and institutional generalizability is unknown. External validation at other paediatric centres is needed before clinical implementation.
-2. **Low events per variable (EPV):** With 147 events and 33 candidate predictors, EPV = 4.5 for the full model. This raises concerns about overfitting, partially mitigated by nested CV with SMOTE and the simplified 10-predictor clinical score (EPV = 14.7). The bootstrap optimism correction (Section 8.11) will quantify the expected performance shrinkage.
-3. **Retrospective design with chart-review data:** Predictor and outcome ascertainment depends on documentation quality. Predictors not documented in the chart are coded as absent, which may misclassify subtle findings. The outcome (MI diagnosis) relies on the final ED diagnosis, not a standardized adjudication process — though the LLM-assisted review with PI adjudication (Section 5b) substantially strengthened outcome accuracy.
+2. **Low events per variable (EPV):** With 147 CINP events and 55 candidate features, EPV = 2.7 for the full model. This raises concerns about overfitting, partially mitigated by XGBoost's internal regularisation (reducing effective degrees of freedom to ~33), nested CV with SMOTE, and the simplified 10-predictor clinical score (EPV = 14.7). The bootstrap optimism correction (Section 8.11) quantifies the expected performance shrinkage. The Riley (2020) sample size criterion is met for 33 effective parameters but not for the full 55 raw features.
+3. **Retrospective design with chart-review data:** Predictor and outcome ascertainment depends on documentation quality. Predictors not documented in the chart are coded as absent, which may misclassify subtle findings. The CINP outcome relies on the final ED diagnosis and documented objective findings, not a standardized adjudication process — though the LLM-assisted review with PI adjudication (Section 5b) substantially strengthened outcome accuracy.
 4. **Temporal validation only (not external):** Year 1 → Year 2 validation from the same institution provides narrow temporal validation but does not test geographic or case-mix generalizability. The single-centre design means unmeasured institutional factors (e.g., referral patterns, diagnostic thresholds) may influence model performance.
 5. **Missing data:** Median imputation used for vitals (temp, hr, CTAS). Missingness may not be MCAR — sicker patients may be more likely to have vitals recorded. Sensitivity analysis (Section 8.1.2) will test the impact of the imputation approach.
 6. **LLM-assisted outcome classification:** Novel methodology with limited precedent. Only 124/2,153 cases (5.8%) were reviewed by the PI; the remaining 94% rely on the LLM-validated checkbox data. Systematic LLM errors could bias the outcome if certain diagnosis types are consistently misclassified.
-7. **Outcome definition sensitivity:** The inclusion of IIH and cerebellar ataxia as MI is clinically debatable. The sensitivity analysis (Section 8.8) tests robustness to this definitional choice.
-8. **Class imbalance:** MI prevalence of 6.8% creates challenges for classifier sensitivity. Despite SMOTE and F2-score optimization, the XGBoost model achieves only ~58% sensitivity — meaning ~42% of MI cases are missed. This has important clinical implications that must be discussed transparently.
+7. **Outcome definition sensitivity:** The CINP framework includes cerebellar ataxia (Criterion 2: objective neurologic finding mandating investigation) even though these cases do not meet the stricter CIIP pathology threshold. The CIIP secondary analysis (Section 8.8) tests robustness to this definitional choice. The inclusion of IIH is also clinically debatable; the CIIP-excl-IIH analysis addresses this.
+8. **Class imbalance:** CINP prevalence of 6.8% creates challenges for classifier sensitivity. Despite SMOTE and F2-score optimization, the XGBoost model achieves only ~58% sensitivity — meaning ~42% of CINP cases are missed. This has important clinical implications that must be discussed transparently.
 9. **Cost analysis uses estimated costs:** The cost-informed threshold analysis (Section 8.12) uses Alberta SOMB professional fees as a proxy for total investigation costs. True institutional costs include facility fees, technical costs, and supplies not captured in physician billing. The three-scenario sensitivity analysis (base, mid, high) partially addresses this, but real-world costs will vary by centre. Downstream costs (treatment, follow-up, missed diagnoses) are not modelled.
