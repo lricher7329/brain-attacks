@@ -29,7 +29,14 @@ MIN_CELL = 5
 COHORT_N = 2153
 
 
+def cell(n):
+    """Count with small-cell suppression: 1 to MIN_CELL-1 shown as "<MIN_CELL"."""
+    return f"<{MIN_CELL}" if 0 < n < MIN_CELL else str(n)
+
+
 def pct(n, d):
+    if 0 < n < MIN_CELL:
+        return f"<{MIN_CELL}"
     return f"{n} ({100 * n / d:.0f}%)" if d else "0"
 
 
@@ -62,11 +69,9 @@ def main():
         rows.append({
             "Diagnosis category": cat,
             "n": n,
-            "Year 1": int((g["year"] == 1).sum()),
-            "Year 2": int((g["year"] == 2).sum()),
-            "Criterion 1": int((g["criterion"] == 1).sum()),
-            "Criterion 2": int((g["criterion"] == 2).sum()),
-            "CIIP": int(g["ciip_status"].sum()),
+            "Criterion 1": cell(int((g["criterion"] == 1).sum())),
+            "Criterion 2": cell(int((g["criterion"] == 2).sum())),
+            "CIIP": cell(int(g["ciip_status"].sum())),
             "Abnormal imaging": pct(int(g["abnormal_imaging"].sum()), n),
             "Specific treatment": pct(int(g["specific_treatment"].sum()), n),
             "≥1 objective finding": pct(int(g["has_finding"].sum()), n),
@@ -78,8 +83,6 @@ def main():
     total = {
         "Diagnosis category": "All CINP cases",
         "n": n_cases,
-        "Year 1": int((df["year"] == 1).sum()),
-        "Year 2": int((df["year"] == 2).sum()),
         "Criterion 1": int((df["criterion"] == 1).sum()),
         "Criterion 2": int((df["criterion"] == 2).sum()),
         "CIIP": int(df["ciip_status"].sum()),
@@ -93,7 +96,10 @@ def main():
 
     findings = (df.loc[df["has_finding"], "objective_findings"].str.split("; ").explode().value_counts())
     findings = findings.rename_axis("Objective finding").reset_index(name="n")
-    findings["% of CINP cases"] = (100 * findings["n"] / n_cases).round(0).astype(int)
+    findings["% of CINP cases"] = (100 * findings["n"] / n_cases).round(0).astype(int).astype(str)
+    small_f = findings["n"] < MIN_CELL
+    findings.loc[small_f, "% of CINP cases"] = "—"
+    findings["n"] = findings["n"].map(cell)
     findings.to_csv(TABLES / "etable10_cinp_objective_findings.csv", index=False)
 
     multi = int((df["mi_diagnoses"].str.count("; ") > 0).sum())
@@ -116,7 +122,8 @@ def main():
         "so category rows sum to more than the total. Criterion 1: confirmed intracranial pathology requiring treatment, imaging surveillance "
         "or specialist referral. Criterion 2: documented objective neurologic finding mandating investigation. CIIP, clinically important "
         "intracranial pathology; IQR, interquartile range."
-        + (f" Other includes {', '.join(s.lower() for s in small)} (categories with fewer than {MIN_CELL} cases)." if small else ""),
+        + (f" Other includes {', '.join(s.lower() for s in small)} (categories with fewer than {MIN_CELL} cases)." if small else "")
+        + f" Counts from 1 to {MIN_CELL - 1} are shown as <{MIN_CELL} to protect confidentiality.",
         "",
         "*Part B. Objective neurologic findings documented among CINP cases*",
         "",

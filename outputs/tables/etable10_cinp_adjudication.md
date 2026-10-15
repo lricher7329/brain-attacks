@@ -2,20 +2,20 @@
 
 *Part A. Adjudication by diagnosis category*
 
-| Diagnosis category | n | Year 1 | Year 2 | Criterion 1 | Criterion 2 | CIIP | Abnormal imaging | Specific treatment | ≥1 objective finding | Objective findings, median (IQR) |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Brain/meningeal infection | 42 | 31 | 11 | 42 | 0 | 42 | 25 (60%) | 4 (10%) | 27 (64%) | 2 (0–3) |
-| Cerebellar ataxia | 26 | 6 | 20 | 0 | 26 | 0 | 1 (4%) | 0 (0%) | 26 (100%) | 2 (1–2) |
-| Neoplasm | 22 | 15 | 7 | 22 | 0 | 22 | 21 (95%) | 1 (5%) | 19 (86%) | 2 (1–3) |
-| Other | 18 | 3 | 15 | 18 | 0 | 18 | 6 (33%) | 1 (6%) | 15 (83%) | 2 (1–2) |
-| Demyelinating disorder | 13 | 3 | 10 | 13 | 0 | 13 | 7 (54%) | 0 (0%) | 12 (92%) | 2 (1–2) |
-| Hydrocephalus | 10 | 7 | 3 | 10 | 0 | 10 | 7 (70%) | 1 (10%) | 6 (60%) | 1 (0–2) |
-| IIH | 8 | 4 | 4 | 8 | 0 | 8 | 6 (75%) | 0 (0%) | 8 (100%) | 2 (1–2) |
-| Intracranial haemorrhage | 8 | 7 | 1 | 8 | 0 | 8 | 8 (100%) | 3 (38%) | 7 (88%) | 2 (2–3) |
-| Stroke | 8 | 5 | 3 | 8 | 0 | 8 | 6 (75%) | 0 (0%) | 7 (88%) | 4 (2–4) |
-| **All CINP cases** | **147** | **75** | **72** | **121** | **26** | **121** | **80 (54%)** | **9 (6%)** | **122 (83%)** | **2 (1–2)** |
+| Diagnosis category | n | Criterion 1 | Criterion 2 | CIIP | Abnormal imaging | Specific treatment | ≥1 objective finding | Objective findings, median (IQR) |
+|---|---|---|---|---|---|---|---|---|
+| Brain/meningeal infection | 42 | 42 | 0 | 42 | 25 (60%) | <5 | 27 (64%) | 2 (0–3) |
+| Cerebellar ataxia | 26 | 0 | 26 | 0 | <5 | 0 (0%) | 26 (100%) | 2 (1–2) |
+| Neoplasm | 22 | 22 | 0 | 22 | 21 (95%) | <5 | 19 (86%) | 2 (1–3) |
+| Other | 18 | 18 | 0 | 18 | 6 (33%) | <5 | 15 (83%) | 2 (1–2) |
+| Demyelinating disorder | 13 | 13 | 0 | 13 | 7 (54%) | 0 (0%) | 12 (92%) | 2 (1–2) |
+| Hydrocephalus | 10 | 10 | 0 | 10 | 7 (70%) | <5 | 6 (60%) | 1 (0–2) |
+| IIH | 8 | 8 | 0 | 8 | 6 (75%) | 0 (0%) | 8 (100%) | 2 (1–2) |
+| Intracranial haemorrhage | 8 | 8 | 0 | 8 | 8 (100%) | <5 | 7 (88%) | 2 (2–3) |
+| Stroke | 8 | 8 | 0 | 8 | 6 (75%) | 0 (0%) | 7 (88%) | 4 (2–4) |
+| **All CINP cases** | **147** | **121** | **26** | **121** | **80 (54%)** | **9 (6%)** | **122 (83%)** | **2 (1–2)** |
 
-A case with more than one CINP diagnosis is counted in each of its categories (7 of 147 cases had more than one), so category rows sum to more than the total. Criterion 1: confirmed intracranial pathology requiring treatment, imaging surveillance or specialist referral. Criterion 2: documented objective neurologic finding mandating investigation. CIIP, clinically important intracranial pathology; IQR, interquartile range. Other includes inborn error of metabolism, vascular malformation, venous thrombosis (categories with fewer than 5 cases).
+A case with more than one CINP diagnosis is counted in each of its categories (7 of 147 cases had more than one), so category rows sum to more than the total. Criterion 1: confirmed intracranial pathology requiring treatment, imaging surveillance or specialist referral. Criterion 2: documented objective neurologic finding mandating investigation. CIIP, clinically important intracranial pathology; IQR, interquartile range. Other includes inborn error of metabolism, vascular malformation, venous thrombosis (categories with fewer than 5 cases). Counts from 1 to 4 are shown as <5 to protect confidentiality.
 
 *Part B. Objective neurologic findings documented among CINP cases*
 
