@@ -1,10 +1,10 @@
-Diagnosis,n,% of CINP,% of Cohort,Year 1,Year 2,CINP Criterion,CIIP
-Brain/meningeal infection,42,28.6,2.0,31,11,1,Yes
-Cerebellar ataxia,26,17.7,1.2,6,20,2,No
-Neoplasm,22,15.0,1.0,15,7,1,Yes
-Other,18,12.2,0.8,3,15,1,Yes
-Demyelinating disorder,13,8.8,0.6,3,10,1,Yes
-Hydrocephalus,10,6.8,0.5,7,3,1,Yes
-IIH,8,5.4,0.4,4,4,1,Yes
-Intracranial haemorrhage,8,5.4,0.4,7,1,1,Yes
-Stroke,8,5.4,0.4,5,3,1,Yes
+Diagnosis,n,% of CINP,% of Cohort,CINP Criterion,CIIP
+Brain/meningeal infection,42,28.6,2.0,1,Yes
+Cerebellar ataxia,26,17.7,1.2,2,No
+Neoplasm,22,15.0,1.0,1,Yes
+Other,18,12.2,0.8,1,Yes
+Demyelinating disorder,13,8.8,0.6,1,Yes
+Hydrocephalus,10,6.8,0.5,1,Yes
+IIH,8,5.4,0.4,1,Yes
+Intracranial haemorrhage,8,5.4,0.4,1,Yes
+Stroke,8,5.4,0.4,1,Yes

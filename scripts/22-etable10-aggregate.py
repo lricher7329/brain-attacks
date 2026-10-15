@@ -51,7 +51,6 @@ def main():
         crit = sorted(g["criterion"].unique())
         t2.append({"Diagnosis": cat, "n": len(g), "% of CINP": round(100 * len(g) / n_cases, 1),
                    "% of Cohort": round(100 * len(g) / COHORT_N, 1),
-                   "Year 1": int((g["year"] == 1).sum()), "Year 2": int((g["year"] == 2).sum()),
                    "CINP Criterion": "/".join(map(str, crit)), "CIIP": "Yes" if g["ciip_status"].all() else "No"})
     pd.DataFrame(t2).sort_values(["n", "Diagnosis"], ascending=[False, True]).to_csv(
         TABLES / "table2_cinp_diagnoses.csv", index=False)
