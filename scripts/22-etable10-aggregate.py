@@ -12,7 +12,9 @@ writes aggregate-only outputs that are safe to share:
 
 Diagnosis categories match manuscript Table 2: a case with more than one CINP
 diagnosis is counted once in each of its categories, so category rows sum to
-more than the number of cases.
+more than the number of cases. Categories with fewer than MIN_CELL cases are
+merged into "Other" (small-cell suppression) in both tables; the Table 2 counts
+are written to outputs/tables/table2_cinp_diagnoses.csv.
 """
 
 from pathlib import Path
@@ -23,6 +25,8 @@ PROJECT = Path(__file__).resolve().parent.parent
 TABLES = PROJECT / "outputs" / "tables"
 
 LABELS = {"ICH": "Intracranial haemorrhage", "Other MI": "Other"}
+MIN_CELL = 5
+COHORT_N = 2153
 
 
 def pct(n, d):
@@ -37,6 +41,20 @@ def main():
 
     long = df.assign(category=df["mi_diagnoses"].str.split("; ")).explode("category")
     long["category"] = long["category"].replace(LABELS)
+    sizes = long.groupby("category")["record_id"].nunique()
+    small = sorted(c for c in sizes.index if sizes[c] < MIN_CELL and c != "Other")
+    long.loc[long["category"].isin(small), "category"] = "Other"
+    long = long.drop_duplicates(["record_id", "year", "category"])
+
+    t2 = []
+    for cat, g in long.groupby("category"):
+        crit = sorted(g["criterion"].unique())
+        t2.append({"Diagnosis": cat, "n": len(g), "% of CINP": round(100 * len(g) / n_cases, 1),
+                   "% of Cohort": round(100 * len(g) / COHORT_N, 1),
+                   "Year 1": int((g["year"] == 1).sum()), "Year 2": int((g["year"] == 2).sum()),
+                   "CINP Criterion": "/".join(map(str, crit)), "CIIP": "Yes" if g["ciip_status"].all() else "No"})
+    pd.DataFrame(t2).sort_values(["n", "Diagnosis"], ascending=[False, True]).to_csv(
+        TABLES / "table2_cinp_diagnoses.csv", index=False)
 
     rows = []
     for cat, g in long.groupby("category"):
@@ -98,7 +116,8 @@ def main():
         f"A case with more than one CINP diagnosis is counted in each of its categories ({multi} of {n_cases} cases had more than one), "
         "so category rows sum to more than the total. Criterion 1: confirmed intracranial pathology requiring treatment, imaging surveillance "
         "or specialist referral. Criterion 2: documented objective neurologic finding mandating investigation. CIIP, clinically important "
-        "intracranial pathology; IQR, interquartile range.",
+        "intracranial pathology; IQR, interquartile range."
+        + (f" Other includes {', '.join(s.lower() for s in small)} (categories with fewer than {MIN_CELL} cases)." if small else ""),
         "",
         "*Part B. Objective neurologic findings documented among CINP cases*",
         "",
@@ -108,6 +127,7 @@ def main():
     md += [f"| {r['Objective finding']} | {r['n']} | {r['% of CINP cases']} |" for _, r in findings.iterrows()]
     md += ["", f"Cases may have more than one finding. {int((~df['has_finding']).sum())} of {n_cases} cases had no objective finding documented."]
     (TABLES / "etable10_cinp_adjudication.md").write_text("\n".join(md) + "\n")
+    print(f"Merged into Other (<{MIN_CELL}): {small}")
     print(f"eTable 10: {len(by_cat) - 1} categories, {len(findings)} findings, {n_cases} cases ({multi} multi-diagnosis)")
 
 
